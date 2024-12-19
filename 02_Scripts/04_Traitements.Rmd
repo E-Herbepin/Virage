@@ -1,0 +1,99 @@
+---
+title: "Les représentations des violences de genre"
+author: "Herbepin Emmanuel"
+date: "2024-11-14"
+output: html_document
+theme : cerulean
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r parameter, message=FALSE, warning=FALSE, cache.extra=, include=FALSE, paged.print=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, cache=TRUE, fig.align='center')
+source("02_Scripts/00_setup.R", echo=FALSE)
+
+Basetemp$nbNA <- rowSums(is.na(Basetemp))
+ggplot(Basetemp, aes(x = nbNA)) +
+  geom_bar() +
+  labs(title = "Nombre de valeurs manquantes par individu",
+       x = "Nombre de valeurs manquantes",
+       y = "Nombre d'individus")
+
+Basetemp[Basetemp$nbNA > 2900,]
+Basetemp$Vict <- rowSums(Basetemp[c(2934:2986,2990:3048,3051:3057)], na.rm = TRUE)
+Basetemp$Vict <- rowSums(Basetemp[c(2934:2986,2993:3047,3051:3057)], na.rm = TRUE)
+Basetemp[c("P_indicateur_12m":"FEnf_VensBISD")]
+
+Basetemp$Vict[Basetemp$Vict == 0]
+
+```
+
+Travail sur les sifflements dans les espaces public
+```{r}
+
+Btp <- select(Basetemp, c("drague":"proagr", "ID")) 
+Btp <- Btp[Btp$drague %in% c(
+      "Une fois",
+      "Quelques fois",
+      "Souvent",
+      "Presque toutes les semaines"
+    ),]  #On enlèves les déclarations de non concerné, les non réponses et les refus (qui sont filtrés dans les questions suivantes)
+
+
+#Vérification des filtres: 
+
+filter(Btp, P1 == 1 & !is.na(P1aP), na.rm = TRUE)
+filter(Btp, P1 %in% c(2,3,4) & !is.na(P1aS), na.rm = TRUE)
+#On a une personne qui a répondu 2 (Quelques fois (2 à 5 fois) à P1 (avez-vous été sifflé-e, interpellé-e ou abordé-e sous un prétexte de drague) mais à qui on a posé la question de la gravité au singulier (P1aS) et qui a répondu 0 (pas grave). On va donc transposer sa réponse de P1aS à P1aP en supposant que l'erreur ne vient pas de la déclaration de violence mais de l'enquêteur qui a posé la mauvaise question.
+Basetemp$P1aP[Basetemp$ID== 1001420599] <- 0
+Basetemp$P1aS[Basetemp$ID== 1001420599] <- NA
+
+filter(Btp, !(P1c %in% c(1,2)) & !is.na(P1c3), na.rm = TRUE)
+filter(Btp, P1c %in% c(1,2) & is.na(P1c3), na.rm = TRUE) # Le filtre de P1c3 est respecté
+
+filter(Btp, !(P1c %in% c(3,4,5,6)) & !is.na(P1c4), na.rm = TRUE)
+filter(Btp, P1c %in% c(3,4,5,6) & is.na(P1c4), na.rm = TRUE)
+# Une personne a répondu aux deux versions de la question P1c3 et P1c4. 
+Basetemp$P1c4[Basetemp$ID== 1002126508] <- NA
+
+filter(Btp, !(P1 %in% c(1,2,3,4)) & !is.na(P1d), na.rm = TRUE)
+filter(Btp, (P1 %in% c(1,2,3,4)) & is.na(P1d), na.rm = TRUE) # Le filtre de P1d est respecté
+
+filter(Btp, !(P1d == 4) & !is.na(P1d1), na.rm = TRUE)
+filter(Btp, (P1d == 4) & is.na(P1d1), na.rm = TRUE) # Le filtre de P1d1 est respecté
+
+table(Btp$P1)
+res_ACM <- MCA(select(Btp, -c("ID")), ncp=6, graph=F) # On réalise l'ACM
+explor(res_ACM)
+
+
+```
+
+
+
+
+
+
+
+
+
+Exemples de traitements
+```{r}
+t(table(filter(PC18, PC18$AGE <= 30))) %>%
+  kable(caption = "<center>Effectif par age</center>") %>%
+kable_styling(bootstrap_options = c("striped", "hover"))
+
+
+
+PC18_30 %>% 
+  summarise_all(funs(sum(!is.na(.)))) %>%
+  gather() %>%
+  arrange(value) %>%
+  kable(caption = "<center>Nombre de réponses par variable</center>",
+         col.names = c("Variable", "Nombre de réponses")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))%>%
+  scroll_box(width = "100%", height = "500px")
+
+
+```
+
