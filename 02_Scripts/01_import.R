@@ -1,7 +1,7 @@
 #Chargement de la base
 data <- read.csv("01_Data/VIRAGE Principal/IE0245/Fichiers de données/CSV/base_virage.csv")
 Basetemp<-data %>%
-  select(ID, Q1, Q3, Q19E_age, Q22E_01, Q25E, Q25E1, Q29E, Q30E, Q29e_9gr, EMP3, EMP9,
+  select(ID,poids_cal, Q1, Q3, Q19E_age, Q22E_01, Q25E, Q25E1, Q29E, Q30E, Q29e_9gr, EMP3, EMP9,
          EMP12c, EMP12c_01, EMP12c_02, EMP12c_03, EMP12c_04, EMP12c_05, EMP12c_06, 
          EMP12c_07, EMP12c_08, EMP12c_09, EMP12c_10, EMP12c_11, EMP12c_12, CS_E_NIV3, 
          Q6, Q6a, Q6a1, Q7, Q7a, Q7a1, Q8, Q8a_duree, Q9, Q9a, Q9a1, Q10, Q10A_duree, 

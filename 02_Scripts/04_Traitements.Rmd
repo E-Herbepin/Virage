@@ -12,7 +12,7 @@ editor_options:
 ```{r parameter, message=FALSE, warning=FALSE, cache.extra=, include=FALSE, paged.print=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, cache=TRUE, fig.align='center')
 source("02_Scripts/00_setup.R", echo=FALSE)
- 
+source("02_Scripts/03_Fonctions.R", echo=FALSE)
 
 Basetemp$nbNA <- rowSums(is.na(Basetemp))
 ggplot(Basetemp, aes(x = nbNA)) +
@@ -32,7 +32,6 @@ Basetemp$Vict[Basetemp$Vict == 0]
 
 Travail sur les sifflements dans les espaces public
 ```{r}
-
 Btp <- select(Basetemp, c("drague":"proagr", "ID")) 
 Btp <- Btp[Btp$drague %in% c(
       "Une fois",

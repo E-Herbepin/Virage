@@ -1,30 +1,26 @@
 #### Socio démo ####
 
 #Pondération
-PC18s <- PC18s %>% 
-  filter(!is.na(POND)) %>% 
-  mutate(POND_r = POND/(sum(POND)/nrow(.))
-  ) #Pour l'ACM et les tableau : le poids somme à la taille de l'échantillon
+Basetemp <- Basetemp %>% 
+  filter(!is.na(poids_cal)) %>% 
+  mutate(POND = poids_cal/(sum(poids_cal)/nrow(.))
+  ) #Pour l'ACM et les tableaux : le poids somme à la taille de l'échantillon
 
-PC18s <- PC18s %>% 
-  filter(!is.na(POND)) %>% 
-  mutate(Poids = POND/(sum(PC18s$POND)/length(PC18s))
+Basetemp <- Basetemp %>% 
+  filter(!is.na(poids_cal)) %>% 
+  mutate(PONDUNI = poids_cal/sum(poids_cal)
 ) #Pour la régression, le poids somme à 1
 
-sum(PC18s$Poids) #Vérification
+sum(Basetemp$PONDUNI
+    ) #Vérification
+
 #Sexe
-PC18s <- mutate(PC18s,
-               sexe_r = factor(SEXE, c(1, 2),
-                               labels = c("Homme", "Femme")))
+  
+Basetemp <- mutate(Basetemp, sexe = factor(Q1, c(1, 2), labels = c("Homme", "Femme")))
 
 #Age
-PC18s <- mutate(PC18s,
-               age_classe = cut(
-                 AGE,
-                 breaks = c(15, 35,55,75,120),
-                 labels = c("15 à 35 ans", "36 à 55 ans", "56 à 75 ans", "76 ans et +"),
-                 include.lowest = TRUE
-               ))
+Basetemp <- mutate(Basetemp,
+               age = Q19E_age)
 
 #Situation
 PC18s <- mutate(PC18s,
