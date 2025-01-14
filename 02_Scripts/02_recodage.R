@@ -1,6 +1,6 @@
-#### Socio démo ####
+# Socio démo ----
 
-#Pondération
+### Pondération ----
 Basetemp <- Basetemp %>% 
   filter(!is.na(poids_cal)) %>% 
   mutate(POND = poids_cal/(sum(poids_cal)/nrow(.))
@@ -11,58 +11,38 @@ Basetemp <- Basetemp %>%
   mutate(PONDUNI = poids_cal/sum(poids_cal)
 ) #Pour la régression, le poids somme à 1
 
-sum(Basetemp$PONDUNI
-    ) #Vérification
-
-#Sexe
+### Sexe ----
   
 Basetemp <- mutate(Basetemp, sexe = factor(Q1, c(1, 2), labels = c("Homme", "Femme")))
 
-#Age
+### Age ----
+
 Basetemp <- mutate(Basetemp,
                age = Q19E_age)
 
-#Situation
-PC18s <- mutate(PC18s,
-               situa_rec = factor(
-                 SITUA,
-                 c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-                 labels = c(
-                   "Occupe un emploi",
-                   "Etudiant,Apprenti,Eleve",
-                   "Etudiant,Apprenti,Eleve",
-                   "Inactif (chomage, invalidité...)",
-                   "Retraité ou retiré des affaires ou en préretraite",
-                   "Inactif (chomage, invalidité...)",# Dans notre cadre, les personnes aux foyers, par la plus grande gestion possible de leur temps concernant les pratiques culturelles, seront associées aux inactifs
-                   "Inactif (chomage, invalidité...)",
-                   "Inactif (chomage, invalidité...)",
-                   "Occupe un emploi", # 3  pers, on suppose qu'elle ne savait pas si leur activité était considéré comme un emploi
-                   "Inactif (chomage, invalidité...)" # REF: 1 pers, on suppose qu'elle ne voulait pas dire qu'elle était inactive
-                 )
-               ))
+### Situation ----
 
-PC18s$SITUAr <- PC18s$SITUA
-PC18s$SITUAr[PC18s$SITUA %in% c(7)] <- ifelse(PC18s$AGE[PC18s$SITUA %in% c(7)] > 62, 5, 1)
-PC18s$SITUAr[PC18s$SITUA %in% c(8)] <- ifelse(PC18s$AGE[PC18s$SITUA %in% c(8)] > 62, 5, ifelse(PC18s$AGE[PC18s$SITUA %in% c(8)] < 19, 2, 1))
-PC18s$SITUAr[PC18s$SITUA %in% c(9)] <- 5 #au vu de leurs ages, nous les considérons comme retraités
-PC18s$SITUAr[PC18s$SITUA %in% c(10)] <- 1
-
-PC18s <- mutate(PC18s,
+Basetemp <- mutate(Basetemp,
                situa = factor(
-                 SITUAr,
-                 c(1, 2, 3, 4, 5, 6),
+                 Q25E,
+                 c(1:13),
                  labels = c(
-                   "Actif",
-                   "Etudiant",
-                   "Etudiant",
-                   "Actif",
-                   "Retraité",
-                   "Actif"
-                 )
-                 )
-               )
+                   "En emploi",
+                   "Au chômage avec indemnités",
+                   "Au chômage sans indemnités",
+                   "En retraite",
+                   "En congé parental ou de solidarité familiale",
+                   "Autre congé de longue durée",
+                   "Etudiant-e, élève",
+                   "Etudiant-e, élève avec stage non rémunéré",
+                   "Etudiant-e, élève avec emploi",
+                   "Inactif-ve ou au foyer ayant déjà travaillé",
+                   "Inactif-ve ou au foyer n'ayant jamais travaillé",
+                   "NVPD",
+                   "NSP"
+                 )))
 
-PC18s <- mutate(PC18s,
+Basetemp <- mutate(Basetemp,
                revenu = factor(
                  CRITREVENU,
                  c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
@@ -82,7 +62,7 @@ PC18s <- mutate(PC18s,
                  )
                ))
 
-PC18s <- mutate(PC18s,
+Basetemp <- mutate(Basetemp,
                 revenu_cat = factor(
                   CRITREVENU,
                   c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
@@ -102,84 +82,111 @@ PC18s <- mutate(PC18s,
                   )
                 ))
 
-PC18s <- mutate(PC18s,
-               UU = factor(
-                 TUU2016,
-                 c(0, 1, 2, 3, 4, 5, 6, 7, 8),
+Basetemp <- mutate(Basetemp,
+               TailleAglo = factor(
+                 Q1,
+                 c(1, 2, 3, 4, 5, 6, 7, 88, 99),
                  labels = c(
-                   "Commune rurale",
-                   "moins de 5 000 habitants",
-                   "5 000 à 9 999 habitants",
-                   "10 000 à 19 999 habitants",
-                   "20 000 à 49 999 habitants",
-                   "50 000 à 99 999 habitants",
-                   "100 000 à 199 999 habitants",
-                   "200 000 à 1 999 999 habitants",
-                   "Paris"
+                   "Paris",
+                   "plus d'un million d'habitants",
+                   "200 000 à un million habitants",
+                   "100 000 à 200 000 habitants",
+                   "20 000 à 100 000 habitants",
+                   "moins de 20 000 habitants",
+                   "moins de 2 000 habitants (village)",
+                   "NVPD",
+                   "NSP"
                  )
                ))
 
 #Recodage du type de commune
-PC18s <- 
-  PC18s %>% 
-  mutate(UU_cat = 
-           case_when(TUU2016 %in% 0:2 ~ "Com. rurale et petite unité urbaine",
-                     TUU2016 %in% 3:6 ~ "Unité urbaine moyenne",
-                     TUU2016 %in% 7:8 ~ "Grande unité urbaine",
-                     .default = NA),
-         UU_cat = fct_relevel(UU_cat, 
-                                    "Com. rurale et petite unité urbaine",
-                                    "Unité urbaine moyenne",
-                                    "Grande unité urbaine"))
+# Basetemp <- 
+#   Basetemp %>% 
+#   mutate(UU_cat = 
+#            case_when(TUU2016 %in% 0:2 ~ "Com. rurale et petite unité urbaine",
+#                      TUU2016 %in% 3:6 ~ "Unité urbaine moyenne",
+#                      TUU2016 %in% 7:8 ~ "Grande unité urbaine",
+#                      .default = NA),
+#          UU_cat = fct_relevel(UU_cat, 
+#                                     "Com. rurale et petite unité urbaine",
+#                                     "Unité urbaine moyenne",
+#                                     "Grande unité urbaine"))
 
-PC18s <- mutate(PC18s,
-               diplome = factor(PC18s$DIPLOM,
-                 c(1:15),
-                 labels = c(
-                   "Inf.Brevet", # Les précisions ne sont pas nécessaires
-                   "Inf.Brevet",
-                   "Inf.Brevet",
-                   "Inf.Brevet",
-                   "Brevet/CAP/Bac",
-                   "Brevet/CAP/Bac",
-                   "Brevet/CAP/Bac",
-                   "Brevet/CAP/Bac",
-                   "Brevet/CAP/Bac",
-                   "Sup.Bac",
-                   "Sup.Bac",
-                   "Sup.Bac",
-                   "Sup.Bac",
-                   "Brevet/CAP/Bac", # On intègre les NSP au niveau de diplome < au bac
-                   "Brevet/CAP/Bac" # On intègre les REF au niveau de diplome < au bac
-                 )
-               ))
+### Nationalité ----
 
-PC18s$diplome[PC18s$DIPLOMACT %in% c(3:8)] <- "Sup.Bac"
+Basetemp <- mutate(Basetemp,
+                   Natio = case_when(
+                     Q22E_01 == 1 ~ "Française de naissances",
+                     Q22E_02 == 1 ~ "Française par acquisition",
+                     Q22E_03 == 1 ~ "Etranger",
+                     Q22E_04 == 1 ~ "Apatride",
+                     Q22E_01 == 88 | Q22E_02 == 88 | Q22E_03 == 88 | Q22E_04 == 88 ~ "NVPD",
+                     Q22E_01 == 99 | Q22E_02 == 99 | Q22E_03 == 99 | Q22E_04 == 99 ~ "NSP"
+                   ))
 
-PC18s <- mutate(PC18s,
-                DIPLOM_r = factor(
-                  DIPLOM,
-                  c(1:15),
+### Diplôme ----
+
+Basetemp <- mutate(Basetemp,
+                Diplome = factor(
+                  Q29E,
+                  c(0,10,20,21,22,23,24,30,31,32,33,40,41,42,43,44,50,51,52,53,54,55,56,60,61,62,63,70,71,72,73,74,75,76,77,78,80,81,82,83,88,99),
                   labels = c(
-                    "Vous n avez jamais été à l'école ou vous l'avez quittée avant la fin du primaire",
-                    "Aucun diplôme et scolarité interrompue à la fin du primaire ou avant la fin du collège",
-                    "Aucun diplôme et scolarité jusqu à la fin du collège et au-delà",
-                    "CEP",
-                    "BEPC, brevet élémentaire, brevet des collèges, DNB",
-                    "CAP, BEP ou diplôme équivalent",
-                    "Baccalauréat général ou technologique, brevet supérieur",
-                    "Capacité en droit, DAEU, ESEU",
-                    "Baccalauréat professionnel, brevet professionnel, de technicien ou d enseignement, diplôme équivalent",
-                    "BTS, DUT, DEUST, diplôme de la santé ou social de niveau Bac+2 ou diplôme équivalent",
-                    "Licence, licence pro, maîtrise ou autre diplôme de niveau Bac+3 ou 4 ou diplôme équivalent",
-                    "Master, DEA, DESS, diplôme grande école de niveau Bac+5, doctorat de santé",
-                    "Doctorat de recherche (hors santé)",
-                    "NSP",
-                    "REF"
+                    "Aucun diplôme",
+                    "Primaire : CEP",
+                    "Secondaire : BEPC",
+                    "Secondaire : CAP",
+                    "Secondaire : BEP",
+                    "Secondaire : Diplômes d'état d'assistant-e familial-e, d'aide-soignant-e, d'auxiliaire de vie sociale, d'aide médico-psychologique",
+                    "Secondaire : Autre diplôme de niveau collège ou lycée",
+                    "Bac : Baccalauréat général",
+                    "Bac : Baccalauréat technologique ou professionnel",
+                    "Bac : Capacité en droit, DAEU, ESEU, Brevet de Technicien, Brevet des métiers d'art…",
+                    "Bac : Autre diplôme équivalent au bac",
+                    "Bac +2 : DEUG",
+                    "Bac +2 : BTS, DUT, DEUST, DSTS, DEIS (ingénierie sociale)",
+                    "Bac +2 : Diplôme des professions sociales et de la santé de niveau bac+2 (assistant-e social-e, éducateur-trice, infirmier-ère…)",
+                    "Bac +2 : Diplômes de 1er cycle du CNAM, Diplôme des métiers d'art",
+                    "Bac +2 : Autre",
+                    "Bac +3 : Licence (L3)",
+                    "Bac +3 : Certificat d'aptitude pédagogique, Diplôme d'études supérieures d'instituteur",
+                    "Bac +3 : Bachelor en école de commerce",
+                    "Bac +3 : Diplôme d'état d'infirmier-e, puéricultrice, masseurkinésithérapeute, psychomotricien-ne, capacité d'orthophonie…",
+                    "Bac +3 : Diplôme de formation générale en sciences maïeutiques
+                    (DFGSMa) (sage femmes)",
+                    "Bac +3 : Diplôme de formation générale en sciences médicales (DFGSM3),
+                    pharmaceutiques (DFGSP), d’odontologie (DFGSO)",
+                    "Bac +3 : Autre",
+                    "Bac +4 : Maîtrise, MST, licence en 4 ans",
+                    "Bac +4 : Diplôme d'une grande école de niveau bac +4 (ingénieur, commerce...)",
+                    "Bac +4 : Diplômes d'études supérieures du CNAM",
+                    "Bac +4 : Autre",
+                    "Bac +5 : CAPES, CAPA, Agrégation (pour enseigner au lycée)",
+                    "Bac +5 : Master enseignement (MEEF)",
+                    "Bac +5 : Master professionnel ou recherche (M2, y compris master IEP)",
+                    "Bac +5 : DESS, DEA, DESup",
+                    "Bac +5 : Diplôme d'une grande école de niveau master (ingénieur, commerce...)",
+                    "Bac +5 : Diplôme d’ingénieur universitaire",
+                    "Bac +5 : Diplôme d’état de sage-femme, diplôme de formation approfondie en sciences maïeutiques (DFASMa)",
+                    "Bac +5 : Diplôme de recherche technologique",
+                    "Bac +5 : Autre diplôme de niveau bac +5",
+                    "Bac +6 et plus : Doctorat, HDR, Agrégation",
+                    "Bac +6 et plus : Domaine médical (y compris DU et DIU de spécialités)",
+                    "Bac +6 et plus : Autre (architecte DPLG…)",
+                    "Bac +6 et plus : Autre",
+                    "NVPD",
+                    "NSP"
                   )
                 ))
 
-PC18s <- mutate(PC18s,
+
+
+
+
+
+
+
+
+Basetemp <- mutate(Basetemp,
                 TpsPro = S11_C_1 + S12_C_1/60,
                 TpsPro_cat = case_when(
                   TpsPro < 35 ~ "<35",
@@ -191,8 +198,8 @@ PC18s <- mutate(PC18s,
 
 # PCS
 
-PC18s <-
-  PC18s %>% 
+Basetemp <-
+  Basetemp %>% 
   mutate(
     PCS =
       case_when(
@@ -214,25 +221,25 @@ PC18s <-
 
 
 
-#### Recodage nb concert ####
+## Recodage nb concert ----
 
-for (x in names(select(PC18s, contains("val")))) {
-  PC18s[x][is.na(PC18s[x])] <- 0}
+for (x in names(select(Basetemp, contains("val")))) {
+  Basetemp[x][is.na(Basetemp[x])] <- 0}
 
-for (x in names(select(PC18s, contains("unit")))) {
-  PC18s[x] <- case_when(
-    PC18s[x] == 1 ~ 52,
-    PC18s[x] == 2 ~ 12,
-    is.na(PC18s[x]) ~ 1,
+for (x in names(select(Basetemp, contains("unit")))) {
+  Basetemp[x] <- case_when(
+    Basetemp[x] == 1 ~ 52,
+    Basetemp[x] == 2 ~ 12,
+    is.na(Basetemp[x]) ~ 1,
     TRUE ~ 1)}
 
-for (x in names(select(PC18s, contains("unit")))) {
+for (x in names(select(Basetemp, contains("unit")))) {
   y<-paste0(substring(x,0,3),substring(x,8))
-  PC18s[y]<-PC18s[x]*PC18s[paste0(substring(x,0,3),"val",substring(x,8))]}
+  Basetemp[y]<-Basetemp[x]*Basetemp[paste0(substring(x,0,3),"val",substring(x,8))]}
 
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   NbConcert =
   G26unit_variet_francaise * G26val_variet_francaise +
     G26unit_musiques_monde * G26val_musiques_monde +
@@ -248,16 +255,16 @@ PC18s <- mutate(
     G26unit_musique_classique * G26val_musique_classique
 )
 
-PC18s$NbConcert_dic <- case_when(
-  PC18s$NbConcert > 0 ~ "Oui",
+Basetemp$NbConcert_dic <- case_when(
+  Basetemp$NbConcert > 0 ~ "Oui",
   TRUE ~ "Non"
 )
 
 ## Recodage nb spectacle
 
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   NbSpe =
     G14unit_theatre * G14val_theatre +
     G14unit_spectacle_rue * G14val_spectacle_rue +
@@ -265,16 +272,16 @@ PC18s <- mutate(
     G14unit_danse * G14val_danse
 )
 
-PC18s$NbSpe_cat <- case_when(PC18s$NbSpe == 0 ~ "Jamais",
-                             PC18s$NbSpe %in% c(1, 2) ~ "1 ou 2 par an",
+Basetemp$NbSpe_cat <- case_when(Basetemp$NbSpe == 0 ~ "Jamais",
+                             Basetemp$NbSpe %in% c(1, 2) ~ "1 ou 2 par an",
                              TRUE ~ "3 ou plus par an")
 
 
 ## Recodage autre sorties
 
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   nbautresorties =
     ifelse(is.na(H204), 0, H204) +
     ifelse(is.na(H205), 0, H205) +
@@ -286,17 +293,17 @@ PC18s <- mutate(
     ifelse(is.na(H211), 0, H211))
 
 
-PC18s$nbautresorties_cat <-
-  case_when(PC18s$nbautresorties >= 3 ~ "3 et +",
-            PC18s$nbautresorties >= 1 ~ "1 ou 2",
+Basetemp$nbautresorties_cat <-
+  case_when(Basetemp$nbautresorties >= 3 ~ "3 et +",
+            Basetemp$nbautresorties >= 1 ~ "1 ou 2",
             TRUE ~ "0")
 
 
 ## Recodage visites
 
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   nbvisites =
     ifelse(is.na(H1001), 0, H1001) +
     ifelse(is.na(H1002), 0, H1002) +
@@ -305,14 +312,14 @@ PC18s <- mutate(
     ifelse(is.na(H1005), 0, H1005) +
     ifelse(is.na(H1006), 0, H1006))
 
-PC18s$nbvisites_cat <- case_when(PC18s$nbvisites == 0 ~ "0",
-                                 PC18s$nbvisites %in% 1:2 ~ "1 ou 2",
+Basetemp$nbvisites_cat <- case_when(Basetemp$nbvisites == 0 ~ "0",
+                                 Basetemp$nbvisites %in% 1:2 ~ "1 ou 2",
                                  TRUE ~ "3 et +")
 
 
 # Recodages supplémentaires
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   pechasse = ifelse(A1008==1,'Oui','Non'),
   jardin = ifelse(A1007==1,'Oui','Non'),
   potag = ifelse(A1006==1,'Oui','Non'),
@@ -323,8 +330,8 @@ PC18s <- mutate(
   collec = ifelse(A1009==1,'Oui','Non')
 )
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   journ = ifelse(is.na(A21_journal),'Non',ifelse(A21_journal==1,'Oui','Non')),
   ecritRomPo = ifelse(is.na(A21_romans),'Non',ifelse(A21_romans==1,'Oui','Non')),
   Montage = ifelse(is.na(A21_montages),'Non',ifelse(A21_montages==1,'Oui','Non')),
@@ -334,8 +341,8 @@ PC18s <- mutate(
   Scien = ifelse(is.na(A21_activite_scientifique),'Non',ifelse(A21_activite_scientifique==1,'Oui','Non'))
 )
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   JV = ifelse(B1==1,'Oui','Non'),
   TV = ifelse(C1 %in% 1:2,'Oui','Non'), # On considère que regarder la TV est une activité d'intérieur lorsqu'elle prend une certaine ampleur (+ de 3 fois par semaine) temporelle pour différencier notre population
   EcouMus = ifelse(E17 %in% 1:2,'Oui','Non'), # De même pour l'écoute à la maison de musique avec un seuil de 'Oui, de temps en temps'
@@ -344,8 +351,8 @@ PC18s <- mutate(
   Cinema = ifelse(G3A ==1 ,'Oui','Non'), # NSP = doute, si doute alors ce n'est pas une activité culturelle marquante
   )
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   Bal = ifelse(G213==1|is.na(G213),'Oui','Non'),
   SpecSpor = ifelse(G214==1|is.na(G214),'Oui','Non'),
   BdN = ifelse(G215==1|is.na(G215),'Oui','Non'),
@@ -355,9 +362,9 @@ PC18s <- mutate(
   SpecThea = ifelse(G134==1|is.na(G134),'Oui','Non')
 )
 
-PC18s <- mutate(
-  PC18s,
-  Radio_15_35 = ifelse(PC18s$age_classe != "15 à 35 ans" | PC18s$E1 %in% c(4:7), "0", "1"),
+Basetemp <- mutate(
+  Basetemp,
+  Radio_15_35 = ifelse(Basetemp$age_classe != "15 à 35 ans" | Basetemp$E1 %in% c(4:7), "0", "1"),
   Radio_36_55 = ifelse(age_classe != "36 à 55 ans" | E1 %in% c(4:7), "0", "1"),
   Radio_56_75 = ifelse(age_classe != "56 à 75 ans" | E1 %in% c(4:7), "0", "1"),
   Radio_75_plus = ifelse(age_classe != "76 ans et plus" | E1 %in% c(4:7), "0", "1"))
@@ -365,8 +372,8 @@ PC18s <- mutate(
 
 ## Recodage diversité activité d'intérieur
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   nbactint =
     ifelse(jardin == "Oui", 1, 0) +
     ifelse(potag == "Oui", 1, 0) +
@@ -385,26 +392,26 @@ PC18s <- mutate(
 )
 
 
-PC18s$nbactint_cat <-
+Basetemp$nbactint_cat <-
   case_when(
-    PC18s$nbactint %in% 0:3 ~ "<=3",
-    PC18s$nbactint %in% 4:5 ~ "4 à 5",
+    Basetemp$nbactint %in% 0:3 ~ "<=3",
+    Basetemp$nbactint %in% 4:5 ~ "4 à 5",
     TRUE ~ ">=6"
   )
-PC18s$nbactint_cat <-
+Basetemp$nbactint_cat <-
   case_when(
-    PC18s$nbactint %in% 0:2 ~ "<=2",
-    PC18s$nbactint %in% 3:4 ~ "3 à 4",
-    PC18s$nbactint %in% 5:6 ~ "5 à 6",
+    Basetemp$nbactint %in% 0:2 ~ "<=2",
+    Basetemp$nbactint %in% 3:4 ~ "3 à 4",
+    Basetemp$nbactint %in% 5:6 ~ "5 à 6",
     TRUE ~ ">=7"
   )
 
-PC18s$nbactint_cat <- factor(PC18s$nbactint_cat, levels = c("<=2", "3 à 4", "5 à 6", ">=7"))
+Basetemp$nbactint_cat <- factor(Basetemp$nbactint_cat, levels = c("<=2", "3 à 4", "5 à 6", ">=7"))
 
 ## Recodage diversité activité d'extérieur
 
-PC18s <- mutate(
-  PC18s,
+Basetemp <- mutate(
+  Basetemp,
   nbactiviteexterieur =
     ifelse(NbConcert_dic == "Oui", 1, 0) +
     ifelse(nbvisites > 0, 1, 0) +
@@ -420,21 +427,21 @@ PC18s <- mutate(
     ifelse(SpecRue == "Oui", 1, 0) +
     ifelse(SpecThea == "Oui", 1, 0)
 )
-PC18s$nbactiviteexterieur_cat <-
+Basetemp$nbactiviteexterieur_cat <-
   case_when(
-    PC18s$nbactiviteexterieur %in% 0:2 ~ "<=2",
-    PC18s$nbactiviteexterieur %in% 3:4 ~ "3 à 4",
-    PC18s$nbactiviteexterieur %in% 5:6 ~ "5 à 6",
+    Basetemp$nbactiviteexterieur %in% 0:2 ~ "<=2",
+    Basetemp$nbactiviteexterieur %in% 3:4 ~ "3 à 4",
+    Basetemp$nbactiviteexterieur %in% 5:6 ~ "5 à 6",
     TRUE ~ ">=7"
   )
 
-PC18s$nbactiviteexterieur_cat <- factor(PC18s$nbactiviteexterieur_cat, levels = c("<=2", "3 à 4", "5 à 6", ">=7"))
+Basetemp$nbactiviteexterieur_cat <- factor(Basetemp$nbactiviteexterieur_cat, levels = c("<=2", "3 à 4", "5 à 6", ">=7"))
 
 
 
 # Labelisation =================================================================
 
-var_label(PC18s) <- list(
+var_label(Basetemp) <- list(
   sexe_r = "Sexe",
   age_classe = "Tranche d'âge",
   situa_rec = "Situation professionnelle",
