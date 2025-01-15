@@ -1,65 +1,62 @@
 # Socio démo ----
 
 ### Pondération ----
-Basetemp <- Basetemp %>% 
+DB <- DB %>% 
   filter(!is.na(poids_cal)) %>% 
   mutate(POND = poids_cal/(sum(poids_cal)/nrow(.))
   ) #Pour l'ACM et les tableaux : le poids somme à la taille de l'échantillon
 
-Basetemp <- Basetemp %>% 
+DB <- DB %>% 
   filter(!is.na(poids_cal)) %>% 
   mutate(PONDUNI = poids_cal/sum(poids_cal)
 ) #Pour la régression, le poids somme à 1
 
 ### Sexe ----
   
-Basetemp <- mutate(Basetemp, sexe = factor(Q1, c(1, 2), labels = c("Homme", "Femme")))
+DB <- mutate(DB, sexe = factor(Q1, c(1, 2), labels = c("Homme", "Femme")))
 
 ### Age ----
 
-Basetemp <- mutate(Basetemp,
+DB <- mutate(DB,
                age = Q19E_age)
 
 ### Situation ----
 
-Basetemp <- mutate(Basetemp,
-               situa = factor(
-                 Q25E,
-                 c(1:13),
-                 labels = c(
-                   "En emploi",
-                   "Au chômage avec indemnités",
-                   "Au chômage sans indemnités",
-                   "En retraite",
-                   "En congé parental ou de solidarité familiale",
-                   "Autre congé de longue durée",
-                   "Etudiant-e, élève",
-                   "Etudiant-e, élève avec stage non rémunéré",
-                   "Etudiant-e, élève avec emploi",
-                   "Inactif-ve ou au foyer ayant déjà travaillé",
-                   "Inactif-ve ou au foyer n'ayant jamais travaillé",
-                   "NVPD",
-                   "NSP"
-                 )))
+DB <- mutate(DB,
+                   situa = factor(
+                     Q25E,
+                     c(1:13),
+                     labels = c(
+                       "En emploi",
+                       "Au chômage avec indemnités",
+                       "Au chômage sans indemnités",
+                       "En retraite",
+                       "En congé parental ou de solidarité familiale",
+                       "Autre congé de longue durée",
+                       "Etudiant-e, élève",
+                       "Etudiant-e, élève avec stage non rémunéré",
+                       "Etudiant-e, élève avec emploi",
+                       "Inactif-ve ou au foyer ayant déjà travaillé",
+                       "Inactif-ve ou au foyer n'ayant jamais travaillé",
+                       "NVPD",
+                       "NSP")),
+                   TypeEmp = factor(
+                     EMP3,
+                     c(1:8,88,99),
+                     labels = c(
+                       "Salarié-e État",
+                       "Salarié-e  collectivité locale, des HLM ou des hôpitaux publics",
+                       "Salarié-e entreprise, artisan",
+                       "Salarié-e association",
+                       "Salarié-e particulier",
+                       "Aide à la famille sans rémunération",
+                       "Chef-fe entreprise salarié-e, PDG, gérant-e minoritaire, associé-e",
+                       "Indépendant-e, à votre compte",
+                       "NVPD",
+                       "NSP"
+                     )))
 
-Basetemp <- mutate(Basetemp,
-               TypeEmp = factor(
-                 EMP3,
-                 c(1:8,88,99),
-                 labels = c(
-                   "Salarié-e État",
-                   "Salarié-e  collectivité locale, des HLM ou des hôpitaux publics",
-                   "Salarié-e entreprise, artisan",
-                   "Salarié-e association",
-                   "Salarié-e particulier",
-                   "Aide à la famille sans rémunération",
-                   "Chef-fe entreprise salarié-e, PDG, gérant-e minoritaire, associé-e",
-                   "Indépendant-e, à votre compte",
-                   "NVPD",
-                   "NSP"
-                 )))
-
-Basetemp <- mutate(Basetemp,
+DB <- mutate(DB,
                TailleAglo = factor(
                  Q1,
                  c(1, 2, 3, 4, 5, 6, 7, 88, 99),
@@ -78,7 +75,7 @@ Basetemp <- mutate(Basetemp,
 
 ### Nationalité ----
 
-Basetemp <- mutate(Basetemp,
+DB <- mutate(DB,
                    Natio = case_when(
                      Q22E_01 == 1 ~ "Française de naissances",
                      Q22E_02 == 1 ~ "Française par acquisition",
@@ -103,7 +100,7 @@ Basetemp <- mutate(Basetemp,
 
 ### Diplôme ----
 
-Basetemp <- mutate(Basetemp,
+DB <- mutate(DB,
                 Diplome = factor(
                   Q29E,
                   c(0,10,20,21,22,23,24,30,31,32,33,40,41,42,43,44,50,51,52,53,54,55,56,60,61,62,63,70,71,72,73,74,75,76,77,78,80,81,82,83,88,99),
@@ -155,10 +152,10 @@ Basetemp <- mutate(Basetemp,
                   )
                 ))
 
-# CSP
+### CSP ----
 
-Basetemp <- 
-  Basetemp %>%
+DB <- 
+  DB %>%
   mutate(CSP_3 = factor(CS_E_NIV3,
                         c(11,12,21,22,23,31,33,34,35,37,38,42,43,44,45,46,47,48,52,53,54,55,56,62,63,64,65,67,68,69,71,72,74,75,77,78,81,84,85,86,91,92,93,94,98,99),
                         labels = c(
@@ -226,18 +223,21 @@ Basetemp <-
 
 ## Situation matrimoniale ----
 
-Basetemp <- mutate(Basetemp,
-                   couple = factor(Q6,
+DB <- mutate(DB,
+                   Couple = case_when(
+                     Q16 <= 120 ~ "Célibat < 1an",# 1 an semble être le début de la queue de distribution
+                     Q16 > 120 ~ "Célibat > 1an",
+                     TRUE ~ factor(Q6,
                                    c(1, 2, 3, 4, 88, 99),
                                    labels = c(
-                                     "Oui, une",
-                                     "Oui, plusieurs",
+                                     "Oui",
+                                     "Oui",# On ne garde pas la distinction avec les polya
                                      "Non aucune, déjà eu une relation de couple",
-                                     "Non aucune, jamais eu de relation de couple",
+                                     "Célibat total",
                                      "NVPD",
-                                     "NSP"
-                                   )),
-                   etat_matrimonial = factor(Etatmat,
+                                     "NSP" ))),
+                   Couple = factor(Couple, levels = c("Oui", "Célibat < 1an", "Célibat > 1an","Célibat total", "NVPD", "NSP")),
+                   Etat_matrimonial = factor(Etatmat,
                                              c(1, 2, 3, 4, 88, 99),
                                              labels = c(
                                                "Célibataire",
@@ -246,10 +246,7 @@ Basetemp <- mutate(Basetemp,
                                                "Veuf-ve",
                                                "NVPD",
                                                "NSP"
-                                             ))
-)
-
-Basetemp <- mutate(Basetemp,
+                                             )),
                    typecouple = factor(Situmat,
                                        c(1, 2, 3, 4, 88, 99),
                                        labels = c(
@@ -260,50 +257,45 @@ Basetemp <- mutate(Basetemp,
                                          "NVPD",
                                          "NSP"
                                        )),
-               matricouple = factor(Q7a,
-                                         c(1, 2, 3, 4, 88, 99),
+                   matricouple = factor(Q7a,
+                                        c(1, 2, 3, 4, 88, 99),
+                                        labels = c(
+                                          "Célibataire",
+                                          "Marié-e",
+                                          "Divorcé-e",
+                                          "Veuf-ve",
+                                          "NVPD",
+                                          "NSP")),
+                   habitecouple = factor(Q8,
+                                         c(0, 1, 88, 99),
                                          labels = c(
-                                           "Célibataire",
-                                           "Marié-e",
-                                           "Divorcé-e",
-                                           "Veuf-ve",
+                                           "Non",
+                                           "Oui",
                                            "NVPD",
-                                           "NSP")
-                                         ),
-               habitecouple = factor(Q8,
-                                       c(0, 1, 88, 99),
+                                           "NSP")),
+                   dureecouple = factor(Dur_relconj,
+                                        c(0, 1, 2, 3, 88, 99),
+                                        labels = c(
+                                          "Moins d'un mois",
+                                          "1 à 11 mois",
+                                          "1 à 55 ans",
+                                          "55 ans ou plus",
+                                          "NVPD",
+                                          "NSP")),
+                   dureecohab = factor(Dur_cohab,
+                                       c(0, 1, 2, 3, 88, 99),
                                        labels = c(
-                                         "Non",
-                                         "Oui",
+                                         "Moins d'un mois",
+                                         "1 à 11 mois",
+                                         "1 à 55 ans",
+                                         "55 ans ou plus",
                                          "NVPD",
-                                         "NSP")
-                                       ),
-               dureecouple = factor(Dur_relconj,
-                                      c(0, 1, 2, 3, 88, 99),
-                                      labels = c(
-                                        "Moins d'un mois",
-                                        "1 à 11 mois",
-                                        "1 à 55 ans",
-                                        "55 ans ou plus",
-                                        "NVPD",
-                                        "NSP")
-                                      ),
-               dureecohab = factor(Dur_cohab,
-                                   c(0, 1, 2, 3, 88, 99),
-                                   labels = c(
-                                     "Moins d'un mois",
-                                     "1 à 11 mois",
-                                     "1 à 55 ans",
-                                     "55 ans ou plus",
-                                     "NVPD",
-                                     "NSP")
-                                   )
-               )
+                                         "NSP")))
 
 
 # Labelisation =================================================================
 
-var_label(Basetemp) <- list(
+var_label(DB) <- list(
   sexe = "Sexe",
   age = "Age",
   situa = "Situation professionnelle",
@@ -314,10 +306,10 @@ var_label(Basetemp) <- list(
   Diplome = "Diplôme",
   CSP_3 = "Catégorie socio-professionnelle (3 niveaux)",
   CSP_1 = "Catégorie socio-professionnelle (1 niveau)",
-  couple = "En couple",
-  etat_matrimonial = "Etat matrimonial",
+  Couple = "Situation de couple",
+  Etat_matrimonial = "Etat matrimonial",
   typecouple = "Type de couple",
-  matricouple = "Situation matrimoniale",
+  matricouple = "Matrimonial du couple",
   habitecouple = "Habite en couple",
   dureecouple = "Durée de la relation de couple",
   dureecohab = "Durée de la cohabitation"

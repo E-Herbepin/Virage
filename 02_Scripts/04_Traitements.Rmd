@@ -95,6 +95,8 @@ PC18_30 %>%
   kable_styling(bootstrap_options = c("striped", "hover"))%>%
   scroll_box(width = "100%", height = "500px")
 
-
+ggplot(Basetemp, aes(x = Q16)) +
+  geom_bar(width = 10) + 
+  xlim(0, 500)
 ```
 
