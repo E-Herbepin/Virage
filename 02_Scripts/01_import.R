@@ -3,15 +3,15 @@ data <- read.csv("01_Data/VIRAGE Principal/IE0245/Fichiers de données/CSV/base_
 DB<-data %>%
   select(ID,poids_cal, Q1, Q3, Q19E_age, Q22E_01:Q22E_04, Q25E, Q25E1, Q29E, Q30E, Q29e_9gr, EMP3, EMP9,
          EMP12c, EMP12c_01, EMP12c_02, EMP12c_03, EMP12c_04, EMP12c_05, EMP12c_06, 
-         EMP12c_07, EMP12c_08, EMP12c_09, EMP12c_10, EMP12c_11, EMP12c_12, CS_E_NIV3, CS_E_NIV1,
+         EMP12c_07, EMP12c_08,Q20E, EMP12c_09, EMP12c_10, EMP12c_11, EMP12c_12, CS_E_NIV3, CS_E_NIV1,
          Q6, Q6a, Q6a1, Q7, Q7a, Q7a1, Q8, Q8a_duree, Q9, Q9a, Q9a1, Q10, Q10A_duree, 
          Q11_duree, Q11a, Q12, Q32, Q32a, Q32b, Q33, Q34, Q34a_duree, Q35, Q36, Q13, 
          Q13b, Q13a, Q13a1, Q16, Q16a, Q14, Q14a_duree, Q15, Q15a, Q17, Etatmat, Situmat, 
-         Fsexcjt, Typecpl, Diffage_cjt, Dur_relconj, Dur_cohab, Q19C, Q22C_01, Q25C, 
-         CS_C_Niv3,Mig_e, Q29c_9gr, Q5, Q5a01, Q5a02, Q5a03, Q5a04, Q5a05, Q5a06, Q5a07, Q5a08, 
+         Fsexcjt, Typecpl, Diffage_cjt, Dur_relconj, Dur_cohab,Q18a, Q19C, Q22C_01, Q25C, 
+         CS_C_Niv3,Mig_e, Q29c_9gr, Q5, Q5a01, Q5a02,Typmen_5mod, Q5a03, Q5a04, Q5a05, Q5a06, Q5a07, Q5a08, 
          Q5a09, Q5a10, Q5a11, Q5a12, Q5a13, Q5a14, Q5a15, Q5a16, Q5a17, Q5a18, Q5a19, 
          Q5a20, Q5a21, Q5a22, Q5a23, Q5a24, Q5a25, Q5a26, Q5a27, Q5a28, Q5b, REV2, REV3, 
-         REV4, REV4bis, REV5, REV6, REV6_01, REV6_02, REV6_03, REV6_04, ENF1a1, ENF1b, 
+         REV4, REV4bis, REV5, REV6,SOC2c, REV6_01, REV6_02, REV6_03, REV6_04,Enf1, ENF1a1, ENF1b, 
          ENF3b, ENF4_01, ENF4_02, ENF4_03, ENF4_04, ENF4_05, ENF4_06, ENF4_07, 
          ENF5_01, ENF5_02, ENF5_03, ENF5_04, ENF5_05,ENF5_06, ENF5_07, 
          ENF6_01, ENF6_02, ENF6_03, ENF6_04, Typmen_9mod, CF6, CF7a, CF7b, CF7c, 
@@ -47,4 +47,3 @@ DB<-data %>%
             V9f3d3, V9g1a_age, V9g1a1, V9g1b1, V9g1c1, V10c1a1, V10c2d_03, V10c2d_04, V10d1a1,
             V10d1c1, V10d2d1, V10d2d4, V10e1a1, V10g1a_age, V10g1a1, V10g1b1, V10g1c1, V12e2,
             V13h_01)) #On enlèves les variables vides
-
