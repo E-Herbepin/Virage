@@ -29,6 +29,7 @@ library(janitor)
 library(kableExtra)
 library(knitr)
 library(labelled)
+library(magrittr)
 library(mapsf)
 library(Matrix)
 library(missMDA)
@@ -47,6 +48,9 @@ library(shiny)
 library(survey)
 library(survival)
 library(tidyverse)
+
+library(furrr)
+
 
 # OPTIONS ----
 
@@ -71,4 +75,4 @@ knitr::opts_chunk$set(
   message = FALSE
 ) 
 
-loadfonts(device = "win")
+loadfonts(device = "win", quiet = TRUE)
