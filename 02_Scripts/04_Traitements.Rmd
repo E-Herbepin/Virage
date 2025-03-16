@@ -1,5 +1,5 @@
 ---
-title: "Les représentations des violences de genre"
+title: "Les représentations victimales des violences de genre"
 author: "Herbepin Emmanuel"
 date: "2024-11-14"
 output: html_document
@@ -11,22 +11,13 @@ editor_options:
 ```{r parameter, message=FALSE, warning=FALSE, cache.extra=, include=FALSE, paged.print=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, cache=TRUE, fig.align='center')
 source("02_Scripts/00_setup.R", echo=FALSE)
+source("02_Scripts/01_Import.R", echo=FALSE)
 source("02_Scripts/03_Fonctions.R", echo=FALSE)
-
-Basetemp$nbNA <- rowSums(is.na(Basetemp))
-ggplot(Basetemp, aes(x = nbNA)) +
-  geom_bar() +
-  labs(title = "Nombre de valeurs manquantes par individu",
-       x = "Nombre de valeurs manquantes",
-       y = "Nombre d'individus)
-
-Basetemp[Basetemp$nbNA > 2900,]
-Basetemp$Vict <- rowSums(Basetemp[c(2934:2986,2990:3048,3051:3057)], na.rm = TRUE)
-Basetemp$Vict <- rowSums(Basetemp[c(2934:2986,2993:3047,3051:3057)], na.rm = TRUE)
-Basetemp[c("P_indicateur_12m":"FEnf_VensBISD")]
-
-Basetemp$Vict[Basetemp$Vict == 0]
-
+source("02_Scripts/Recodage/01_Socio_Demo.R", echo=FALSE)
+source("02_Scripts/Recodage/02_Espace_Public.R", echo=FALSE)
+source("02_Scripts/Recodage/03_Famille.R", echo=FALSE)
+source("02_Scripts/Recodage/04_Couple.R", echo=FALSE)
+source("02_Scripts/Recodage/Labellisation.R", echo=FALSE)
 ```
 
 Travail sur les sifflements dans les espaces public
@@ -97,6 +88,166 @@ table(DB$sexe, DB$TypeEmp)
 
 DB$TypeEmp %>%
   table(DB$sexe,.)
+```
 
+Var à construire : 
+Proportion d'hommes parmi les agresseurs
+Gravité maximale dans l'espace public
+Gravité minimale dans l'espace public
+
+
+
+Faire une liste des réponses aux question P1 à P11
+si <4 (qui est la fréquence max : Presque toutes les semaines)
+Si il y a 3 fois 01 (Une fois) => les remplacer par un 02
+Si 2fois 02 (Quelques fois(2 à 5 fois)) => 03
+Si 3 fois 03 (Souvent (6 fois ou plus)) => 04
+Prendre le maximum inférieur à 5 (sinon, prendrait les NSP=99)
+
+Indicatrice du vécu d'une seule violence : div=1 ou div=1 ET fr_rec=1
+
+
+
+```{r}
+
+DB %<>% mutate(
+  EPlist = pmap(select(., paste0("P", 1:11)), c),#liste des réponses aux questions P1 à P11
+  EP_div = as.numeric(map(EPlist, function(x) {
+    return(length(x[!(x %in% c("0", "88", "99"))]))})), #Diversité des violences subies
+  EP_fr_rec = as.numeric(map(EPlist, function(x) {
+    x <- c(x[x != "0"],"0") #Supprime les "0"
+    
+    if (sum(x == "1", na.rm = TRUE) >= 3) {
+      x <- c(x, rep("2",sum(x == "1", na.rm = TRUE) %/% 3)) #Ajoute un 2 pour chaque groupe de 3 "1"
+      x <- x[x != "1"] #Supprime les "1"
+    }
+    
+    if (sum(x == "2", na.rm = TRUE) >= 2) {
+      x <- c(x, rep("3",sum(x == "2", na.rm = TRUE) %/% 2)) #Ajoute un 3 pour chaque groupe de 2 "2"
+      x <- x[x != "2"] #Supprime les "2"
+    }
+    
+    if (sum(x == "3", na.rm = TRUE) >= 2) {
+      x <- c(x, rep("4",sum(x == "3", na.rm = TRUE) %/% 2)) #Ajoute un 4 pour chaque groupe de 3 "3"
+      x <- x[x != "3"] #Supprime les "3"
+    }
+    
+    return(max(x[x<5]))
+  })),
+  EP_dic = ifelse(EP_fr_rec==0,0,1),
+  EP_fr_rec = factor(EP_fr_rec, levels = 0:4, labels = c("Non concerné", "Une fois", "Quelques fois", "Souvent", "un fois par mois ou plus")))
+
+freq(DB$EP_dic)
+cprop(table(DB$EP_dic, DB$sexe))
+cprop(table(DB$EP_fr_rec, DB$sexe))
+cprop(table(DB$EP_div, DB$sexe)[-1,], digits = 2) #Parmis les personnes qui ont subis des violences
+
+
+DB %<>% mutate(
+  EP_grav = pmap(select(., c(paste0("P", 1:9, "aS"),
+                              paste0("P", 1:9, "aP"),
+                              paste0("P", 10:11, "dS"),
+                              paste0("P", 10:11, "dP"))), c), #liste des réponses aux questions P1 à P11
+  EP_grav_max = as.character(map(EP_grav, function(x) {
+    return(case_when(
+    "2" %in% x | "1" %in% x[grepl("P$", names(x))] ~ "Très grave",
+    "3" %in% x ~ "Assez grave",
+    "0" %in% x ~ "Pas grave",
+    TRUE ~ NA_character_))})),# Donne la gravité maximale subie
+  
+  EP_grav_nb = ifelse(is.na(EP_grav_max), NA,
+                          as.character(map(EP_grav, function(x) {
+    return(sum(x %in% c("1", "2", "3"), na.rm = TRUE))}))), # Donne le nombre de violences grave subies ("au moins assez grave")
+  
+  EP_grav_prop = 100 * as.numeric(DB$EP_grav_nb)/as.numeric(DB$EP_div),
+  
+  EP_tres_grav_nb = ifelse(is.na(EP_grav_max), NA,
+                           as.character(map(EP_grav, function(x) {
+    return(sum(x %in% c("2", "1"), na.rm = TRUE))}))), # Donne le nombre de violences "très grave" subies
+  
+  EP_tres_grav_prop = 100 * as.numeric(DB$EP_tres_grav_nb)/as.numeric(DB$EP_div)
+  )
+
+
+DB %>%
+  group_by(DB$sexe) %>%
+  select(EP_grav_prop)%>%
+  table()
+
+ggplot() +
+  aes(x = DB$EP_grav_prop) +
+  geom_bar(aes(y = after_stat(prop * 100),fill = DB$sexe), position = "dodge") +
+  labs(title = "Proportion de violences graves parmis les violences subies",
+       x = "Proportion de violences graves subies",
+       y = "Proportionn d'individus",
+       caption = "Source: Enquête Virage
+       Lecture : ~60% des hommes victimes de violences dans les espaces publics ne considèrent pas celles qu'ils ont subies comme graves. ~6% considèrent que seule la moitié est au moins 'assez grave'")
+```
+
+
+
+
+
+
+
+```{r}
+
+DB %<>% mutate(
+  EPlist = pmap(select(., paste0("P", 1:11)), c),#liste des réponses aux questions P1 à P11
+  EP_div = as.numeric(map(EPlist, function(x) {
+    return(length(x[!(x %in% c("0", "88", "99"))]))})), #Diversité des violences subies
+  EP_fr_rec = as.numeric(map(EPlist, function(x) {
+    x <- c(x[x != "0"],"0") #Supprime les "0"
+    
+    if (sum(x == "1", na.rm = TRUE) >= 3) {
+      x <- c(x, rep("2",sum(x == "1", na.rm = TRUE) %/% 3)) #Ajoute un 2 pour chaque groupe de 3 "1"
+      x <- x[x != "1"] #Supprime les "1"
+    }
+    
+    if (sum(x == "2", na.rm = TRUE) >= 2) {
+      x <- c(x, rep("3",sum(x == "2", na.rm = TRUE) %/% 2)) #Ajoute un 3 pour chaque groupe de 2 "2"
+      x <- x[x != "2"] #Supprime les "2"
+    }
+    
+    if (sum(x == "3", na.rm = TRUE) >= 2) {
+      x <- c(x, rep("4",sum(x == "3", na.rm = TRUE) %/% 2)) #Ajoute un 4 pour chaque groupe de 3 "3"
+      x <- x[x != "3"] #Supprime les "3"
+    }
+    
+    return(max(x[x<5]))
+  })),
+  EP_dic = ifelse(EP_fr_rec==0,0,1),
+  EP_fr_rec = factor(EP_fr_rec, levels = 0:4, labels = c("Non concerné", "Une fois", "Quelques fois", "Souvent", "un fois par mois ou plus")))
+
+freq(DB$EP_dic)
+cprop(table(DB$EP_dic, DB$sexe))
+cprop(table(DB$EP_fr_rec, DB$sexe))
+cprop(table(DB$EP_div, DB$sexe)[-1,], digits = 2) #Parmis les personnes qui ont subis des violences
+
+
+DB %<>% mutate(
+  EP_grav = pmap(select(., c(paste0("P", 1:9, "aS"),
+                              paste0("P", 1:9, "aP"),
+                              paste0("P", 10:11, "dS"),
+                              paste0("P", 10:11, "dP"))), c), #liste des réponses aux questions P1 à P11
+  EP_grav_max = as.character(map(EP_grav, function(x) {
+    return(case_when(
+    "2" %in% x | "1" %in% x[grepl("P$", names(x))] ~ "Très grave",
+    "3" %in% x ~ "Assez grave",
+    "0" %in% x ~ "Pas grave",
+    TRUE ~ NA_character_))})),# Donne la gravité maximale subie
+  
+  EP_grav_nb = ifelse(is.na(EP_grav_max), NA,
+                          as.character(map(EP_grav, function(x) {
+    return(sum(x %in% c("1", "2", "3"), na.rm = TRUE))}))), # Donne le nombre de violences grave subies ("au moins assez grave")
+  
+  EP_grav_prop = 100 * as.numeric(DB$EP_grav_nb)/as.numeric(DB$EP_div),
+  
+  EP_tres_grav_nb = ifelse(is.na(EP_grav_max), NA,
+                           as.character(map(EP_grav, function(x) {
+    return(sum(x %in% c("2", "1"), na.rm = TRUE))}))), # Donne le nombre de violences "très grave" subies
+  
+  EP_tres_grav_prop = 100 * as.numeric(DB$EP_tres_grav_nb)/as.numeric(DB$EP_div)
+  )
 
 ```
