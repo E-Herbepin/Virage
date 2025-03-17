@@ -5,6 +5,8 @@ c("bookdown", "broom", "carData", "ClustOfVar", "cluster", "effects", "esquisse"
   lapply(library, character.only = TRUE) %>%
   invisible()
 
+
+
 # OPTIONS ----
 
 set_flextable_defaults(decimal.mark = ",", big.mark = " ", na_st = "-")
