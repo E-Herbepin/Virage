@@ -1,68 +1,26 @@
 #### PACKAGES ET OPTIONS #####
 
 # PACKAGES ----
-
-library(bookdown)
-library(broom)
-library(carData)
-library(ClustOfVar)
-library(cluster)
-library(effects)
-library(esquisse)
-library(extrafont)
-library(explor)
-library(FactoMineR)
-library(factoextra)
-library(FactoInvestigate)
-library(Factoshiny)
-library(flextable)
-library(gtools)
-library(gmodels)
-library(ggrepel)
-library(ggtrace)
-library(GDAtools)
-library(grid)
-library(gt)
-library(gtsummary)
-library(here)
-library(janitor)
-library(kableExtra)
-library(knitr)
-library(labelled)
-library(mapsf)
-library(Matrix)
-library(missMDA)
-library(nnet)
-library(officer)
-library(openxlsx)
-library(printr)
-library(questionr)
-library(RColorBrewer)
-library(rmarkdown)
-library(rmdformats)
-library(rticles)
-library(scales)
-library(sf)
-library(shiny)
-library(survey)
-library(survival)
-library(tidyverse)
+c("bookdown", "broom", "carData", "ClustOfVar", "cluster", "effects", "esquisse", "extrafont", "explor", "FactoMineR", "factoextra", "FactoInvestigate", "Factoshiny", "flextable", "gtools", "gmodels", "ggrepel", "ggtrace", "GDAtools", "grid", "gt", "gtsummary", "here", "janitor", "kableExtra", "knitr", "labelled", "magrittr", "mapsf", "Matrix", "missMDA", "nnet", "officer", "openxlsx", "printr", "questionr", "RColorBrewer", "rmarkdown", "rmdformats", "rticles", "scales", "sf", "shiny", "survey", "survival", "tidyverse") %>%
+  lapply(library, character.only = TRUE) %>%
+  invisible()
 
 # OPTIONS ----
 
 set_flextable_defaults(decimal.mark = ",", big.mark = " ", na_st = "-")
 
-options(OutDec= ",")
-
-options(scipen=999) # pour désactiver l'écriture scientifique des nombres
+options(OutDec= ",",
+        scipen=999) # pour désactiver l'écriture scientifique des nombres
 
 # on indique à gtsummary un affichage en français
 theme_gtsummary_language(
   "fr",
   decimal.mark = ",", # séparateur de décimales
   big.mark = " " # séparateur de milliers
-)
-theme_gtsummary_compact()
+) %>%
+  invisible()
+theme_gtsummary_compact() %>%
+  invisible()
 
 # pour empêcher knitr d'afficher les messages et les warnings dans les .Rmd et .qmd
 
@@ -71,4 +29,5 @@ knitr::opts_chunk$set(
   message = FALSE
 ) 
 
-loadfonts(device = "win")
+loadfonts(device = "win") %>%
+  invisible()
