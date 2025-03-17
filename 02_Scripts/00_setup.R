@@ -1,11 +1,10 @@
 #### PACKAGES ET OPTIONS #####
 
 # PACKAGES ----
-c("bookdown", "broom", "carData", "ClustOfVar", "cluster", "effects", "esquisse", "extrafont", "explor", "FactoMineR", "factoextra", "FactoInvestigate", "Factoshiny", "flextable", "gtools", "gmodels", "ggrepel", "ggtrace", "GDAtools", "grid", "gt", "gtsummary", "here", "janitor", "kableExtra", "knitr", "labelled", "magrittr", "mapsf", "Matrix", "missMDA", "nnet", "officer", "openxlsx", "printr", "questionr", "RColorBrewer", "rmarkdown", "rmdformats", "rticles", "scales", "sf", "shiny", "survey", "survival", "tidyverse") %>%
-  lapply(library, character.only = TRUE) %>%
+
+c("bookdown", "broom", "carData", "ClustOfVar", "cluster", "effects", "esquisse", "extrafont", "explor", "FactoMineR", "factoextra", "FactoInvestigate", "Factoshiny", "flextable", "gtools", "gmodels", "ggrepel", "ggtrace", "GDAtools", "grid", "gt", "gtsummary", "here", "janitor", "kableExtra", "knitr", "labelled", "magrittr", "mapsf", "Matrix", "missMDA", "nnet", "officer", "openxlsx", "printr", "questionr", "RColorBrewer", "rmarkdown", "rmdformats", "rticles", "scales", "sf", "shiny", "survey", "survival", "tidyverse") |>
+  lapply(library, character.only = TRUE) |>
   invisible()
-
-
 
 # OPTIONS ----
 
@@ -28,8 +27,7 @@ theme_gtsummary_compact() %>%
 
 knitr::opts_chunk$set(
   warning = FALSE, 
-  message = FALSE
-) 
+  message = FALSE) 
 
 loadfonts(device = "win") %>%
   invisible()
