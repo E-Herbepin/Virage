@@ -10,8 +10,16 @@ editor_options:
 
 ```{r parameter, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, cache=TRUE, fig.align='center')
-source("02_Scripts/00_setup.R", echo = FALSE)
 source("02_Scripts/03_Fonctions.R")
+chut(source("02_Scripts/00_setup.R", echo = FALSE, verbose = FALSE))
+chut(source("02_Scripts/01_Import.R", echo = FALSE, verbose = FALSE))
+chut(source("02_Scripts/Recodage/01_Socio_Demo.R", echo = FALSE, verbose = FALSE))
+
+
+
+DBf <- DB %>% vict()
+
+
 ```
 
 ```{r}

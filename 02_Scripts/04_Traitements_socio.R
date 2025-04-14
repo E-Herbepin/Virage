@@ -9,10 +9,6 @@
 
 # On commence par charger les librairies nécessaires
 library(tidyverse)
-
-# On charge la base de données
-DB <- readRDS("DB.RDS")
-
 # Sexe
 
 DB %>%
