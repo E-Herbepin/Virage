@@ -233,8 +233,7 @@ ggplot() +
 DB %>%
   group_by(sexe) %>%
   select(EP_fr_rec, EP_grav_tg_nb) %>%
-  table()
-%>%
+  table() %>%
   lprop(digits = 2) #Nombre de violences déclarées comme "au moins assez grave" par sexe 
 
 

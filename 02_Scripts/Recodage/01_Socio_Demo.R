@@ -1,7 +1,7 @@
 # Pondération ----
 
 DB %<>%
-  filter(!is.na(poids_cal)) %>%
+  filter(!is.na(poids_cal)) |>
   mutate(
     POND = poids_cal / (sum(poids_cal) / nrow(.)),
     #Pour l'ACM et les tableaux : le poids somme à la taille de l'échantillon
@@ -129,11 +129,11 @@ DB %<>%
       c(1, 2, 3, 4, 5, 99),
       labels = c(
         "Majoritaire",
-        "Né-e dans un DOM",
-        "Immigré-e",
-        "Descendant-e d'1 immigré-e",
-        "Descendant-e de 2 immigré-e-s",
-        "Inclassable"
+        "Immigré-e et descendants", # DOM 
+        "Immigré-e et descendants",
+        "Immigré-e et descendants",
+        "Immigré-e et descendants",
+        "NSP"
       )
     ),
     
@@ -375,7 +375,7 @@ DB %<>%
               "NSP"
             )
         )
-      ) %>%
+      ) |>
       factor(
         levels = c(
           "Oui",
